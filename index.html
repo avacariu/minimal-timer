@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+  <title>Timer</title>
+
+  <style>
+  html, body{
+    height: 100%;
+    width: 100%;
+    margin: 0;
+  }
+  body {
+    display: table;
+    font-family: "Helvetica", "Arial", sans-serif;
+  }
+  #timer {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 200px;
+    font-weight: bold;
+    color: black;
+  }
+  #settings-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: gray;
+    position: absolute;
+    right: 16px;
+    bottom: 10px;
+    width: 50px;
+    height: 50px;
+  }
+
+  #settings-btn.pressed {
+    background: white;
+    border: 1px solid lightgray;
+    border-top: none;
+  }
+  #controls {
+    position: absolute;
+    bottom: 1rem;
+    text-align: center;
+    width: 300px;
+    left: calc(50% - 150px);
+  }
+  button {
+    background: none;
+    border: 1px solid lightgray;
+    color: gray;
+    padding: 2px;
+  }
+  #settings {
+    position: absolute;
+    right: 16px;
+    bottom: 59px;
+    padding: 10px;
+    border: 1px solid lightgray;
+    display: none;
+  }
+  #settings form {
+    text-align: center;
+  }
+  #settings label {
+    display: block;
+    clear: both;
+    margin-bottom: 5px;
+    text-align: right;
+  }
+  #settings input {
+    width: 50px;
+    text-align: right;
+  }
+  #settings button {
+    width: 100%;
+  }
+  #status {
+    width: 300px;
+    position: absolute;
+    left: calc(50% - 150px);
+    bottom: 4rem;
+    text-align: center;
+  }
+  </style>
+
+  <script>
+
+  // credit to http://stackoverflow.com/a/2880929/398749 for this function
+  var urlParams;
+  (window.onpopstate = function () {
+      var match,
+          pl     = /\+/g,  // Regex for replacing addition symbol with a space
+          search = /([^&=]+)=?([^&]*)/g,
+          decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+          query  = window.location.search.substring(1);
+
+      urlParams = {};
+      while (match = search.exec(query))
+         urlParams[decode(match[1])] = decode(match[2]);
+  })();
+  // end credited code
+
+  window.onload = function() {
+    var settings_btn = document.getElementById("settings-btn");
+    settings_btn.addEventListener("click",
+        function() {
+          var settings = document.getElementById("settings");
+          var hidden = getComputedStyle(settings, null).display;
+
+          settings_btn.classList.toggle("pressed")
+
+          if (hidden == "none") {
+            settings.style.display = "initial";
+          } else {
+            settings.style.display = "none";
+          }
+        }
+    );
+
+    var work_len = 25;
+    var short_len = 5;
+    var long_len = 10;
+
+    if (urlParams["work"] != undefined && urlParams["work"] != "") {
+      work_len = urlParams["work"];
+    }
+    if (urlParams["short"] != undefined && urlParams["short"] != "") {
+      short_len = urlParams["short"];
+    }
+    if (urlParams["long"] != undefined && urlParams["long"] != "") {
+      long_len = urlParams["long"];
+    }
+
+    document.getElementById("inputWork").value = work_len;
+    document.getElementById("inputShortBreak").value = short_len;
+    document.getElementById("inputLongBreak").value = long_len;
+
+    var status = document.getElementById("status");
+    var status_text = "";
+    var end_status = "";
+
+    var timer = document.getElementById("timer");
+    timer.textContent = work_len < 10 ? "0" + work_len+":00" : work_len+":00";
+
+    var timerIntervalId = null;
+
+    // duration is number of minutes
+    function startTimer(duration, display) {
+      var timer = duration*60, minutes, seconds;
+      function countdown() {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+          display.style.color = "red";
+          clearInterval(timerIntervalId);
+          status.textContent = end_status;
+        }
+      }
+
+      countdown();
+      return setInterval(countdown, 1000);
+    }
+
+    document.getElementById("work").addEventListener("click",
+        function() {
+          timer.style.color = "black";
+          clearInterval(timerIntervalId);
+          timerIntervalId = startTimer(work_len, timer);
+          status.textContent = "";
+          end_status = "Work has ended. Take a break!";
+        }
+    );
+
+    document.getElementById("short-break").addEventListener("click",
+        function() {
+          timer.style.color = "orangered";
+          clearInterval(timerIntervalId);
+          timerIntervalId = startTimer(short_len, timer);
+          status.textContent = "Short break!";
+          end_status = "Break ended. Get back to work!";
+        }
+    );
+
+    document.getElementById("long-break").addEventListener("click",
+        function() {
+          timer.style.color = "green";
+          clearInterval(timerIntervalId);
+          timerIntervalId = startTimer(long_len, timer);
+          status.textContent = "Long break!";
+          end_status = "Break ended. Get back to work!";
+        }
+    );
+  }
+  </script>
+
+</head>
+<body>
+
+  <div id="timer"></div>
+
+  <div id="controls">
+    <button id="work">work</button>
+    <button id="short-break">short break</button>
+    <button id="long-break">long break</button>
+  </div>
+
+  <div id="settings">
+    <form action="" method="GET">
+      <label for="inputWork">Work
+        <input id="inputWork" type="text" name="work" /> <small>mins</small>
+      </label>
+
+      <label for="inputShortBreak">Short break
+        <input id="inputShortBreak" type="text" name="short" /> <small>mins</small>
+      </label>
+
+      <label for="inputLongBreak">Long break
+        <input id="inputLongBreak" type="text" name="long" /> <small>mins</small>
+      </label>
+
+      <button type="submit">Save</button>
+    </form>
+  </div>
+
+  <button id="settings-btn">&#9881;</button>
+
+  <div id="status">Ready to get started.</div>
+
+</body>
+</html>
