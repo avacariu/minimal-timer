@@ -36,6 +36,10 @@
     width: 50px;
     height: 50px;
   }
+  #settings-btn:hover,
+  #settings-btn.pressed {
+    color: #616161;
+  }
   #settings-btn.pressed {
     border: 1px solid lightgray;
     border-top: none;
@@ -60,6 +64,9 @@
     padding: 2px;
     line-height: 20px;
     font-size: 13px;
+  }
+  button:hover {
+    background-color: #F0F0F0;
   }
   #settings {
     position: absolute;
@@ -113,9 +120,14 @@
   }
   body.in-progress #controls button {
     background: white;
+    color: gray;
   }
   body.in-progress #controls:hover button {
     background: #F9F9F9;
+    color: #333;
+  }
+  body.in-progress #controls:hover button:hover {
+    background-color: #F0F0F0;
   }
   </style>
 
