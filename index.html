@@ -96,6 +96,19 @@
     bottom: 4rem;
     text-align: center;
   }
+  body.in-progress #settings-btn {
+    opacity: 0.3;
+  }
+  body.in-progress #settings-btn:hover,
+  body.in-progress #settings-btn.pressed {
+    opacity: 1;
+  }
+  body.in-progress #controls {
+    opacity: 0.3;
+  }
+  body.in-progress #controls:hover {
+    opacity: 1;
+  }
   </style>
 
   <script>
@@ -202,6 +215,7 @@
           clearInterval(timerIntervalId);
           status.textContent = end_status;
           suggest(suggested_control);
+          document.body.className = "";
         }
       }
 
@@ -212,6 +226,7 @@
     control_work.addEventListener("click",
         function() {
           timer.style.color = "black";
+          document.body.className = "in-progress";
           clearInterval(timerIntervalId);
           timerIntervalId = startTimer(work_len, timer);
           status.textContent = "";
@@ -228,6 +243,7 @@
     control_short.addEventListener("click",
         function() {
           timer.style.color = "orange";
+          document.body.className = "";
           clearInterval(timerIntervalId);
           timerIntervalId = startTimer(short_len, timer);
           status.textContent = "Short break!";
@@ -239,6 +255,7 @@
     control_long.addEventListener("click",
         function() {
           timer.style.color = "green";
+          document.body.className = "";
           clearInterval(timerIntervalId);
           timerIntervalId = startTimer(long_len, timer);
           status.textContent = "Long break!";
