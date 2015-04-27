@@ -48,6 +48,12 @@
     width: 300px;
     left: calc(50% - 150px);
   }
+  #controls button {
+    width: 97px;
+  }
+  #controls button.suggested {
+    font-weight: bold;
+  }
   button {
     background: none;
     border: 1px solid lightgray;
@@ -70,6 +76,11 @@
     clear: both;
     margin-bottom: 5px;
     text-align: right;
+  }
+  #settings label small {
+    width: 45px;
+    display: inline-block;
+    text-align: left;
   }
   #settings input {
     width: 50px;
@@ -124,6 +135,7 @@
     var work_len = 25;
     var short_len = 5;
     var long_len = 10;
+    var work_periods = 4;
 
     if (urlParams["work"] != undefined && urlParams["work"] != "") {
       work_len = urlParams["work"];
@@ -134,22 +146,47 @@
     if (urlParams["long"] != undefined && urlParams["long"] != "") {
       long_len = urlParams["long"];
     }
+    if (urlParams["periods"] != undefined && urlParams["periods"] != "") {
+      work_periods = urlParams["periods"];
+    }
 
     document.getElementById("inputWork").value = work_len;
     document.getElementById("inputShortBreak").value = short_len;
     document.getElementById("inputLongBreak").value = long_len;
+    document.getElementById("inputWorkPeriods").value = work_periods;
 
     var status = document.getElementById("status");
     var status_text = "";
     var end_status = "";
+
+    var periods_worked = 0;
 
     var timer = document.getElementById("timer");
     timer.textContent = work_len < 10 ? "0" + work_len+":00" : work_len+":00";
 
     var timerIntervalId = null;
 
+    var control_work = document.getElementById("work");
+    var control_short = document.getElementById("short-break");
+    var control_long = document.getElementById("long-break");
+
+    var suggested_control = control_work;
+
+    // suggest a button to press
+    function suggest(control) {
+      control_work.className = "";
+      control_short.className = "";
+      control_long.className = "";
+
+      if (control != null)
+        control.className = "suggested";
+    }
+
+    suggest(suggested_control);
+
     // duration is number of minutes
     function startTimer(duration, display) {
+      suggest(null);
       var timer = duration*60, minutes, seconds;
       function countdown() {
         minutes = parseInt(timer / 60, 10);
@@ -164,6 +201,7 @@
           display.style.color = "red";
           clearInterval(timerIntervalId);
           status.textContent = end_status;
+          suggest(suggested_control);
         }
       }
 
@@ -171,33 +209,42 @@
       return setInterval(countdown, 1000);
     }
 
-    document.getElementById("work").addEventListener("click",
+    control_work.addEventListener("click",
         function() {
           timer.style.color = "black";
           clearInterval(timerIntervalId);
           timerIntervalId = startTimer(work_len, timer);
           status.textContent = "";
           end_status = "Work has ended. Take a break!";
+          periods_worked++;
+          if (work_periods == periods_worked) {
+            suggested_control = control_long;
+          } else {
+            suggested_control = control_short;
+          }
         }
     );
 
-    document.getElementById("short-break").addEventListener("click",
+    control_short.addEventListener("click",
         function() {
-          timer.style.color = "orangered";
+          timer.style.color = "orange";
           clearInterval(timerIntervalId);
           timerIntervalId = startTimer(short_len, timer);
           status.textContent = "Short break!";
           end_status = "Break ended. Get back to work!";
+          suggested_control = control_work;
         }
     );
 
-    document.getElementById("long-break").addEventListener("click",
+    control_long.addEventListener("click",
         function() {
           timer.style.color = "green";
           clearInterval(timerIntervalId);
           timerIntervalId = startTimer(long_len, timer);
           status.textContent = "Long break!";
           end_status = "Break ended. Get back to work!";
+          suggested_control = control_work;
+          periods_worked = 0;
         }
     );
   }
@@ -226,6 +273,10 @@
 
       <label for="inputLongBreak">Long break
         <input id="inputLongBreak" type="text" name="long" /> <small>mins</small>
+      </label>
+
+      <label for="inputWorkPeriods">Work periods
+        <input id="inputWorkPeriods" type="text" name="periods" /> <small></small>
       </label>
 
       <button type="submit">Save</button>
