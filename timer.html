@@ -25,7 +25,7 @@
     color: black;
   }
   #settings-btn {
-    background: none;
+    background: white;
     border: none;
     font-size: 2rem;
     color: gray;
@@ -35,9 +35,7 @@
     width: 50px;
     height: 50px;
   }
-
   #settings-btn.pressed {
-    background: white;
     border: 1px solid lightgray;
     border-top: none;
   }
@@ -55,9 +53,9 @@
     font-weight: bold;
   }
   button {
-    background: none;
+    background: #F9F9F9;
     border: 1px solid lightgray;
-    color: gray;
+    color: #333;
     padding: 2px;
   }
   #settings {
@@ -67,6 +65,7 @@
     padding: 10px;
     border: 1px solid lightgray;
     display: none;
+    background: white;
   }
   #settings form {
     text-align: center;
@@ -108,6 +107,12 @@
   }
   body.in-progress #controls:hover {
     opacity: 1;
+  }
+  body.in-progress #controls button {
+    background: white;
+  }
+  body.in-progress #controls:hover button {
+    background: #F9F9F9;
   }
   </style>
 
