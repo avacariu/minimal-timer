@@ -150,13 +150,13 @@
   // end credited code
 
   window.onload = function() {
-    var settings_btn = document.getElementById("settings-btn");
-    settings_btn.addEventListener("click",
+    var settingsBtn = document.getElementById("settings-btn");
+    settingsBtn.addEventListener("click",
         function() {
           var settings = document.getElementById("settings");
           var hidden = getComputedStyle(settings, null).display;
 
-          settings_btn.classList.toggle("pressed")
+          settingsBtn.classList.toggle("pressed")
 
           if (hidden == "none") {
             settings.style.display = "block";
@@ -166,57 +166,52 @@
         }
     );
 
-    var work_len = 25;
-    var short_len = 5;
-    var long_len = 10;
-    var work_periods = 4;
-
-    if (urlParams["work"] != undefined && urlParams["work"] != "") {
-      work_len = urlParams["work"];
-    }
-    if (urlParams["short"] != undefined && urlParams["short"] != "") {
-      short_len = urlParams["short"];
-    }
-    if (urlParams["long"] != undefined && urlParams["long"] != "") {
-      long_len = urlParams["long"];
-    }
-    if (urlParams["periods"] != undefined && urlParams["periods"] != "") {
-      work_periods = urlParams["periods"];
+    var preferences = {
+      "work": 25,
+      "short": 5,
+      "long": 10,
+      "periods": 3,
     }
 
-    document.getElementById("inputWork").value = work_len;
-    document.getElementById("inputShortBreak").value = short_len;
-    document.getElementById("inputLongBreak").value = long_len;
-    document.getElementById("inputWorkPeriods").value = work_periods;
+    for (var param in urlParams) {
+      if (param != undefined && param != "" && !isNaN(urlParams[param]) && preferences.hasOwnProperty(param)) {
+        preferences[param] = parseInt(urlParams[param]);
+      }
+    }
+
+    document.getElementById("inputWork").value = preferences["work"];
+    document.getElementById("inputShortBreak").value = preferences["short"];
+    document.getElementById("inputLongBreak").value = preferences["long"];
+    document.getElementById("inputPeriods").value = preferences["periods"];
 
     var status = document.getElementById("status");
-    var status_text = "";
-    var end_status = "";
+    var statusText = "";
+    var endStatus = "";
 
-    var periods_worked = 0;
+    var periodsWorked = 0;
 
     var timer = document.getElementById("timer");
-    timer.textContent = work_len < 10 ? "0" + work_len+":00" : work_len+":00";
+    timer.textContent = preferences["work"] < 10 ? "0" + preferences["work"]+":00" : preferences["work"]+":00";
 
     var timerIntervalId = null;
 
-    var control_work = document.getElementById("work");
-    var control_short = document.getElementById("short-break");
-    var control_long = document.getElementById("long-break");
+    var controlWork = document.getElementById("work");
+    var controlShort = document.getElementById("short-break");
+    var controlLong = document.getElementById("long-break");
 
-    var suggested_control = control_work;
+    var suggestedControl = controlWork;
 
     // suggest a button to press
     function suggest(control) {
-      control_work.className = "";
-      control_short.className = "";
-      control_long.className = "";
+      controlWork.className = "";
+      controlShort.className = "";
+      controlLong.className = "";
 
       if (control != null)
         control.className = "suggested";
     }
 
-    suggest(suggested_control);
+    suggest(suggestedControl);
 
     // duration is number of minutes
     function startTimer(duration, display) {
@@ -234,8 +229,8 @@
         if (--timer < 0) {
           display.style.color = "red";
           clearInterval(timerIntervalId);
-          status.textContent = end_status;
-          suggest(suggested_control);
+          status.textContent = endStatus;
+          suggest(suggestedControl);
           document.body.className = "";
         }
       }
@@ -244,45 +239,45 @@
       return setInterval(countdown, 1000);
     }
 
-    control_work.addEventListener("click",
+    controlWork.addEventListener("click",
         function() {
           timer.style.color = "black";
           document.body.className = "in-progress";
           clearInterval(timerIntervalId);
-          timerIntervalId = startTimer(work_len, timer);
+          timerIntervalId = startTimer(preferences["work"], timer);
           status.textContent = "";
-          end_status = "Work has ended. Take a break!";
-          periods_worked++;
-          if (work_periods == periods_worked) {
-            suggested_control = control_long;
+          endStatus = "Work has ended. Take a break!";
+          periodsWorked++;
+          if (preferences["periods"] == periodsWorked) {
+            suggestedControl = controlLong;
           } else {
-            suggested_control = control_short;
+            suggestedControl = controlShort;
           }
         }
     );
 
-    control_short.addEventListener("click",
+    controlShort.addEventListener("click",
         function() {
           timer.style.color = "orange";
           document.body.className = "";
           clearInterval(timerIntervalId);
-          timerIntervalId = startTimer(short_len, timer);
+          timerIntervalId = startTimer(preferences["short"], timer);
           status.textContent = "Short break!";
-          end_status = "Break ended. Get back to work!";
-          suggested_control = control_work;
+          endStatus = "Break ended. Get back to work!";
+          suggestedControl = controlWork;
         }
     );
 
-    control_long.addEventListener("click",
+    controlLong.addEventListener("click",
         function() {
           timer.style.color = "green";
           document.body.className = "";
           clearInterval(timerIntervalId);
-          timerIntervalId = startTimer(long_len, timer);
+          timerIntervalId = startTimer(preferences["long"], timer);
           status.textContent = "Long break!";
-          end_status = "Break ended. Get back to work!";
-          suggested_control = control_work;
-          periods_worked = 0;
+          endStatus = "Break ended. Get back to work!";
+          suggestedControl = controlWork;
+          periodsWorked = 0;
         }
     );
   }
@@ -315,8 +310,8 @@
         <input id="inputLongBreak" type="text" name="long" /> <small>mins</small>
       </label>
 
-      <label for="inputWorkPeriods">Work periods
-        <input id="inputWorkPeriods" type="text" name="periods" /> <small></small>
+      <label for="inputPeriods">Work periods
+        <input id="inputPeriods" type="text" name="periods" /> <small></small>
       </label>
 
       <button type="submit">Save</button>
