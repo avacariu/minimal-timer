@@ -280,6 +280,12 @@
           periodsWorked = 0;
         }
     );
+
+    window.addEventListener("keyup", function(event) {
+      if (event.keyCode == 32) {
+        suggestedControl.dispatchEvent(new Event('click'));
+      }
+    });
   }
   </script>
 
