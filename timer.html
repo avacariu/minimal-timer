@@ -171,11 +171,14 @@
       "short": 5,
       "long": 10,
       "periods": 3,
+      "seconds": true,
     }
 
     for (var param in urlParams) {
       if (param != undefined && param != "" && !isNaN(urlParams[param]) && preferences.hasOwnProperty(param)) {
         preferences[param] = parseInt(urlParams[param]);
+      } else if (param == "seconds") {
+        preferences[param] = (urlParams[param] == "true");
       }
     }
 
@@ -183,15 +186,22 @@
     document.getElementById("inputShortBreak").value = preferences["short"];
     document.getElementById("inputLongBreak").value = preferences["long"];
     document.getElementById("inputPeriods").value = preferences["periods"];
+    document.getElementById("inputSeconds").value = preferences["seconds"];
 
     var status = document.getElementById("status");
     var statusText = "";
     var endStatus = "";
+    var currentMode = "none";
 
     var periodsWorked = 0;
 
     var timer = document.getElementById("timer");
-    timer.textContent = preferences["work"] < 10 ? "0" + preferences["work"]+":00" : preferences["work"]+":00";
+
+    if (preferences["seconds"] == true)
+      var _secs = ":00";
+    else
+      var _secs = "";
+    timer.textContent = preferences["work"] < 10 ? "0" + preferences["work"]+_secs : preferences["work"]+_secs;
 
     var timerIntervalId = null;
 
@@ -224,7 +234,10 @@
         minutes = minutes < 10 ? "0" + minutes : minutes;
         seconds = seconds < 10 ? "0" + seconds : seconds;
 
-        display.textContent = minutes + ":" + seconds;
+        if (currentMode === "work" && preferences["seconds"] == false)
+          display.textContent = minutes;
+        else
+          display.textContent = minutes + ":" + seconds;
 
         if (--timer < 0) {
           display.style.color = "red";
@@ -241,6 +254,7 @@
 
     controlWork.addEventListener("click",
         function() {
+          currentMode = "work";
           timer.style.color = "black";
           document.body.className = "in-progress";
           clearInterval(timerIntervalId);
@@ -258,6 +272,7 @@
 
     controlShort.addEventListener("click",
         function() {
+          currentMode = "short";
           timer.style.color = "orange";
           document.body.className = "";
           clearInterval(timerIntervalId);
@@ -270,6 +285,7 @@
 
     controlLong.addEventListener("click",
         function() {
+          currentMode = "long";
           timer.style.color = "green";
           document.body.className = "";
           clearInterval(timerIntervalId);
@@ -318,6 +334,10 @@
 
       <label for="inputPeriods">Work periods
         <input id="inputPeriods" type="text" name="periods" /> <small></small>
+      </label>
+
+      <label for="inputSeconds">Show seconds
+        <input id="inputSeconds" type="text" name="seconds" /> <small></small>
       </label>
 
       <button type="submit">Save</button>
